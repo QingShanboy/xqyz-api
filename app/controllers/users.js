@@ -8,7 +8,9 @@ class UsersControllers{
         ctx.body = await User.find()
     }
     async getUserId(ctx) {
-        const user = await User.findById(ctx.params.id)
+        const  { fileds = '' } = ctx.query
+        const  selectFileds = fileds.split(';').filter(f => f).map(f => ' +' +  f ).join('')
+        const user = await User.findById(ctx.params.id).select(selectFileds)
         if(!user) {ctx.throw(404, '用户不存在')}
         ctx.body = user
     }

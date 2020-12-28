@@ -5,11 +5,11 @@ const userSchema = new Schema({
     __v: {type: Number, select: false },
     name: {type: String, required: true},
     password: {type: String, required: true, select: false },
-    headPhoto: {type: String, required: true, select: false },
-    gender:{type:String , enum:['male', 'female'],default:'', required:false},
-    signature:{type:String , default:'', required:false},
-    birthday: {type:String , default:'', required:false},
-    add: {type:String , default:'', required:false}
+    headPhoto: {type: String},
+    gender:{ type: String , enum: ['male', 'female'], default: 'male', required: true},
+    signature:{ type: String},
+    birthday: {type: String},
+    add: { type: String, select: false }
 })
 
 module.exports = model('User', userSchema)
