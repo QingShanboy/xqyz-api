@@ -1,18 +1,24 @@
 const jsonwebtoken = require('jsonwebtoken')
 const User = require('../models/users')
 const config = require('../config/index')
-
+const { checkCode } = require('../component/utils')
 
 class UsersControllers{
     async getUser(ctx) {
         ctx.body = await User.find()
     }
     async getUserId(ctx) {
-        const  { fileds = '' } = ctx.query
-        const  selectFileds = fileds.split(';').filter(f => f).map(f => ' +' +  f ).join('')
+        const { fields = '' } = ctx.query
+        const selectFileds = fields.split(';').filter(f => f).map(f => ' +' +  f ).join(' ')
         const user = await User.findById(ctx.params.id).select(selectFileds)
         if(!user) {ctx.throw(404, '用户不存在')}
         ctx.body = user
+        // const { fields = '' } = ctx.query
+        // const selectFields = fields.split(';').filter(f => f).map(f => ' +' + f).join('')
+        // const user = await User.findById(ctx.params.id).select(selectFields)
+        // if (!user) { ctx.throw(404, '用户不存在'); }
+        // console.log(user)
+        // ctx.body = user;
     }
     async chexkOwner(ctx,next) {
         if(ctx.params.id !== ctx.state.user._id) {
@@ -36,7 +42,7 @@ class UsersControllers{
         ctx.verifyParams({
             name: {type:'string', required: false },
             password: { type:'string', required: false },
-            headPhoto: {type: 'string', required: false, select: false },
+            headPhoto: {type: 'string', required: false},
             gender:{type: 'string', required:false },
             signature:{type: 'string',required:false},
             birthday: {type: 'string', required:false},
@@ -51,18 +57,44 @@ class UsersControllers{
         if(!user) {ctx.throw(404, '用户不存在')}
         ctx.status = 204;
     }
+    //密码登录
     async login(ctx) {
-        ctx.verifyParams({
-            name: { type:'string', required: true },
-            password: { type:'string', required: true }
-        })
-        const user = await User.findOne(ctx.request.body)
-        if(!user) {
-            ctx.throw(401,'用户名或密码不正确')
+        //接收用户数据 
+        const { body } = ctx.request
+        let sid = body.sid
+        let code = body.code
+        console.log(ctx.request.body)
+        const codeRes = await checkCode(sid,code)
+        if(codeRes) {
+            const checkUser = {
+                name: body.name,
+                password: body.password
+            }
+            console.log('2')
+            ctx.verifyParams({
+                name: { type:'string', required: true },
+                password: { type:'string', required: true }
+            })
+            const user = await User.findOne(checkUser)
+            if(!user) {
+                return ctx.body = { 
+                    code: 400,
+                    msg:'用户名或密码不正确，请重新输入' 
+                }
+            }
+            const  { _id, name} = user
+            const token = jsonwebtoken.sign({_id, name}, config.secret, {expiresIn: '1d'})
+            ctx.body = { 
+                code: 200,
+                token 
+            }
+        } else {
+            return ctx.body = { 
+                code: 400,
+                msg:'验证输入错误，请重新输入' 
+            }
         }
-        const  { _id, name} = user
-        const token = jsonwebtoken.sign({_id, name}, config.secret, {expiresIn: '1d'})
-        ctx.body = { token }
+        
     }
 }
 
