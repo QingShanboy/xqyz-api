@@ -3,6 +3,7 @@ const { getValue } = require('../config/RedidConfig')
 
 const checkCode = async (key, value) => {
     const redisData = await getValue(key)
+    console.log(redisData)
     if(redisData != null) {
         if(redisData.toLowerCase() === value.toLowerCase()) {
             return true

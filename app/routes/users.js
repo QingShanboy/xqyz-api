@@ -4,8 +4,8 @@ const Router = require('koa-router')
 const router = new Router({prefix: '/users'})
 
 const { 
-        getUser, getUserId, createUser, 
-        updateUser, deleteUser, login, chexkOwner
+        getUser, getUserId, createUser, regist,
+        updateUser, deleteUser, login, chexkOwner,
     } = require('../controllers/users')
 
 
@@ -32,5 +32,7 @@ router.patch('/:id', auth, chexkOwner, updateUser)
 router.delete('/:id', auth, chexkOwner, deleteUser)
 
 router.post('/login', login)
+
+router.post('/regist', regist)
 
 module.exports = router

@@ -96,6 +96,40 @@ class UsersControllers{
         }
         
     }
+    //密码登录
+    async regist(ctx) {
+        // 注册用户数据校验
+        ctx.verifyParams({
+            name: { type:'string', required: true },
+            password: { type:'string', required: true }
+        })
+        const { body } = ctx.request
+        let sid = body.sid
+        let code = body.code
+        console.log(ctx.request.body)
+        const codeRes = await checkCode(sid,code)
+        if(codeRes) {
+            const { name } = ctx.request.body
+            const  ceckUser = await User.findOne({ name })
+            if(ceckUser) {
+                return ctx.body = { 
+                    code: 400,
+                    msg:'该昵称已经被人使用，请重新为自己想一个好听的昵称' 
+                }
+            }
+            const user  = await new User(ctx.request.body).save()
+            ctx.body = { 
+                code: 200,
+                msg:'注册成功，欢迎登录体验闲逸致乐' 
+            }
+        } else {
+            return ctx.body = { 
+                code: 400,
+                msg:'验证输入错误，请重新输入' 
+            }
+        }
+        
+    }
 }
 
 module.exports = new UsersControllers()
