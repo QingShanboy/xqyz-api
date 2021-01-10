@@ -7,7 +7,7 @@ class UsersControllers{
     async getUser(ctx) {
         ctx.body = await User.find()
     }
-    async getUserId(ctx) {
+    async getUserById(ctx) {
         const { fields = '' } = ctx.query
         const selectFileds = fields.split(';').filter(f => f).map(f => ' +' +  f ).join(' ')
         const user = await User.findById(ctx.params.id).select(selectFileds)
@@ -43,14 +43,28 @@ class UsersControllers{
             name: {type:'string', required: false },
             password: { type:'string', required: false },
             headPhoto: {type: 'string', required: false},
-            gender:{type: 'string', required:false },
+            gender:{type: 'number', required:false },
             signature:{type: 'string',required:false},
             birthday: {type: 'string', required:false},
             add: {type: 'string', required:false}
         })
+        const { name } = ctx.request.body
+        if(name) {
+            const  ceckUser = await User.findOne({ name })
+            if(ceckUser) {
+                return ctx.body = { 
+                    code: 400,
+                    msg:'该昵称已经被人使用，请重新为自己想一个好听的昵称' 
+                }
+            } 
+        }
         const user  = await User.findByIdAndUpdate(ctx.params.id,ctx.request.body)
         if(!user) {ctx.throw(404, '用户不存在')}
-        ctx.body = user
+        ctx.body = {
+            code: 200,
+            msg:"更新成功"
+
+        }
     }
     async deleteUser(ctx) {
         const user = await User.findByIdAndRemove(ctx.params.id)
@@ -86,7 +100,8 @@ class UsersControllers{
             const token = jsonwebtoken.sign({_id, name}, config.secret, {expiresIn: '1d'})
             ctx.body = { 
                 code: 200,
-                token 
+                token ,
+                _id
             }
         } else {
             return ctx.body = { 

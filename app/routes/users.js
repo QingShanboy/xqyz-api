@@ -4,7 +4,7 @@ const Router = require('koa-router')
 const router = new Router({prefix: '/users'})
 
 const { 
-        getUser, getUserId, createUser, regist,
+        getUser, getUserById, createUser, regist,
         updateUser, deleteUser, login, chexkOwner,
     } = require('../controllers/users')
 
@@ -23,7 +23,7 @@ const auth = jwt({secret})
 // }
 router.get('/', getUser)
 
-router.get('/:id', getUserId)
+router.get('/:id', getUserById)
 
 router.post('/', createUser)
 
