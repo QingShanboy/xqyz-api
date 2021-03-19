@@ -15,7 +15,7 @@ const userSchema = new Schema({
     },
     followingChannels: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Channels'}],
-      default:'60025a8b79f727434c159f8c',
+      default:'',
       select: false
     },// 点赞的文章
     likeArticles: {
@@ -38,6 +38,10 @@ const userSchema = new Schema({
     collectingAnswers: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
       select: false,
+    },// 点赞的评论
+    likeComments: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'comments' }],
+      select: false
     },
 })
 

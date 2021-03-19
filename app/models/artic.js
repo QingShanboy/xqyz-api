@@ -17,7 +17,8 @@ const articSchema =  new Schema({
      ]
    },
     // 文章的点赞量
-    zan_number:{ type: Number,default: 0,select: false },
+    zan_number:{ type: Number,default: 0},
+    aritc_number:{ type: Number,default: 0},
     updatedDate: {type: Date,select: false },
     // 文章的收藏量
     collect_number: {type: Number,default: 0,select: false },

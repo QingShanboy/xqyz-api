@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node app",
+    "start": "cross-env NODE_ENV=production nodemon app",
+    "build": "cross-env NODE_ENV=production nodemon app",
     "dev": "nodemon app"
   },
   "author": "qingshan",

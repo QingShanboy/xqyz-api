@@ -23,8 +23,6 @@ class ArticleCtl {
   
   // 根据文章的id返回指定的文章
   async getArticleById (ctx) {
-    console.log(ctx.state.user._id)
-    console.log(1)
     const { fields = '' } = ctx.query;
     const selectFields = fields.split(';').filter(f => f).map(f => ' +' + f).join('');
     const article = await artic.findById(ctx.params.id).select(selectFields).populate('publisher channels')
@@ -86,7 +84,6 @@ class ArticleCtl {
     })
     // 根据标题检查是否是重复添加了
     const oleArticle = await artic.findOne({ title: ctx.request.body.title })
-    console.log(oleArticle)
     if (oleArticle) { ctx.throw(404, '此文章已存在，请勿重复添加') }
     const article = new artic ({ publisher: ctx.state.user._id, ...ctx.request.body })
     await article.save()
@@ -97,7 +94,6 @@ class ArticleCtl {
       await channel.save()
       await artic.findByIdAndUpdate(article._id, { $inc: { collect_number: 1 } })
     }
-    console.log(article)
     ctx.body = {
       code:200,
       message: '创建成功'

@@ -1,4 +1,5 @@
 const Comment = require('../models/comments');
+const artic = require('../models/artic.js')
 
 class CommentsCtl {
   async find(ctx) {
@@ -12,12 +13,11 @@ class CommentsCtl {
     const comment = await Comment
       .find({ content: q,articleId, rootCommentId })
       .limit(perPage).skip(page * perPage)
-      .populate('commentator replyTo');
+      .populate('commentator second_comment replyTo')
     ctx.body ={
       code:200,
       data: comment,
-      total: comment.length,
-      type
+      total: comment.length
     }
   }
   async checkCommentExist(ctx, next) {
@@ -36,7 +36,11 @@ class CommentsCtl {
     const { fields = '' } = ctx.query;
     const selectFields = fields.split(';').filter(f => f).map(f => ' +' + f).join('');
     const comment = await Comment.findById(ctx.params.id).select(selectFields).populate('commentator');
-    ctx.body = comment;
+    ctx.body ={
+      code:200,
+      data: comment,
+      total: comment.length
+    }
   }
   async create(ctx) {
     ctx.verifyParams({
@@ -44,14 +48,25 @@ class CommentsCtl {
       rootCommentId: { type: 'string', required: false },
       replyTo: { type: 'string', required: false },
     })
-    const {type} = ctx.query
     const commentator = ctx.state.user._id
     const { articleId } = ctx.params
-    const comment = await new Comment({ ...ctx.request.body, commentator, articleId }).save()
+    const { body } = ctx.request
+    const { rootCommentId, replyTo, content } = ctx.request.body
+    if(rootCommentId && replyTo) {
+      const comment = await Comment.findById(rootCommentId)
+      comment.second_comment.unshift({ ...body, articleId, createdAt: new Date(), commentator })
+      comment.save()
+      // 文章的评论数量递增
+      await artic.findByIdAndUpdate(articleId, { $inc: { aritc_number: 1 } })
+
+    } else {
+      const comment = await new Comment({ ...body, commentator, articleId }).save()
+      // 文章的评论数量递增
+      await artic.findByIdAndUpdate(articleId, { $inc: { aritc_number: 1 } })
+    }
     ctx.body = {
       code:200,
-      data: comment,
-      type
+      message: '评论成功'
     }
   }
   async checkCommentator(ctx, next) {
